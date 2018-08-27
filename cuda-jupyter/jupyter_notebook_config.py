@@ -10,6 +10,12 @@ from subprocess import call
 
 decrypted = call(["openssl", "req", "-x509", "-nodes", "-days", "365", "-subj", "/C=US/ST=VA", "-newkey", "rsa:1024", "-keyout", "/home/lem/.jupyter/mykey.key", "-out", "/home/lem/.jupyter/mycert.pem"])
 print(decrypted)
+
+### test for theano gpu running
+# decrypted = call(["python", "/home/lem/gpu_test.py"])
+# print(decrypted)
+##################
+
 c = get_config()
 c.NotebookApp.ip = '*'
 c.NotebookApp.port = 8888
