@@ -4,6 +4,9 @@
 # Ubuntu 18.04 (bionic) from 2018-05-26
 # https://github.com/docker-library/official-images/commit/aac6a45b9eb2bffb8102353c350d341a410fb169
 FROM nvidia/cuda:9.0-cudnn7-devel
+# FROM nvidia/cuda:8.0-cudnn5-runtime
+
+# FROM ubuntu:bionic-20180526@sha256:c8c275751219dadad8fa56b3ac41ca6cb22219ff117ca98fe82b42f24e1ba64e
 
 LABEL maintainer="Liming Zhang, tongjiyiming@gmail.com"
 
@@ -14,16 +17,19 @@ USER root
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -yq dist-upgrade \
  && apt-get install -yq --no-install-recommends \
+    build-essential \
+    nano \
+    apt-utils \
     wget \
-    git-core \
     bzip2 \
+    gfortran \
+    git \
     ca-certificates \
     sudo \
     locales \
     fonts-liberation \
-#    python-nose \
-#    python-numpy \
-#    python-scipy
+    liblapack-dev \
+    libopenblas-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -54,12 +60,8 @@ RUN groupadd wheel -g 11 && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-# Install CMake 3
-RUN cd /root && wget http://www.cmake.org/files/v3.8/cmake-3.8.1.tar.gz && \
-  tar -xf cmake-3.8.1.tar.gz && cd cmake-3.8.1 && \
-  ./configure && \
-  make -j "$(nproc)" && \
-  make install
+# Set CUDA_ROOT
+ENV CUDA_ROOT /usr/local/cuda/bin
 
 USER $NB_UID
 
@@ -98,6 +100,7 @@ RUN conda install --quiet --yes 'tini=0.18.0' && \
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
+#    mkl=2017 \
     mkl-service \
     pygpu \
     'notebook=5.6.*' \
@@ -112,15 +115,18 @@ RUN conda install --quiet --yes \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-# Install Cython
-RUN pip install --upgrade nose numpy scipy Cython
+#RUN conda install --quiet --yes \
+#    theano pygpu -c conda-forge
+#RUN conda install --quiet --yes \
+#    pymc3 -c conda-forge&& \
+#    conda clean -tipsy
 
-RUN pip install --upgrade six numpy scipy pymc3
+RUN pip install --upgrade six Sphinx pymc3 numpy scipy seaborn
 RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git
 
 # Set up .theanorc for CUDA
-RUN echo "[global]\ndevice=cuda\nfloatX=float32\noptimizer_including=cudnn\n[lib]\ncnmem=0.1\n[nvcc]\nfastmath=True" > /home/$NB_USER/.theanorc
-# RUN echo "[global]\ndevice=cuda\nfloatX=float32\n[lib]\ncnmem=0.1\n[nvcc]\nfastmath=True" > /home/$NB_USER/.theanorc
+# RUN echo "[global]\ndevice=cuda\nfloatX=float32\noptimizer_including=cudnn\n[lib]\ncnmem=0.1\n[nvcc]\nfastmath=True" > /home/$NB_USER/.theanorc
+RUN echo "[global]\ndevice=cuda\nfloatX=float32\n[lib]\ncnmem=0.1\n[nvcc]\nfastmath=True" > /home/$NB_USER/.theanorc
 
 USER root
 
