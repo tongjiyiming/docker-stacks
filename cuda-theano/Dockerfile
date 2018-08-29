@@ -21,9 +21,8 @@ RUN apt-get update && apt-get -yq dist-upgrade \
     sudo \
     locales \
     fonts-liberation \
-#    python-nose \
-#    python-numpy \
-#    python-scipy
+#    liblapack-dev \
+#    libopenblas-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -98,8 +97,10 @@ RUN conda install --quiet --yes 'tini=0.18.0' && \
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
+    mkl=2017 \
     mkl-service \
     pygpu \
+    numpy=1.14.5 \
     'notebook=5.6.*' \
     'jupyterhub=0.9.*' \
     'jupyterlab=0.34.*' && \
@@ -113,9 +114,8 @@ RUN conda install --quiet --yes \
     fix-permissions /home/$NB_USER
 
 # Install Cython
-RUN pip install --upgrade nose numpy scipy Cython
+RUN pip install --upgrade nose six numpy==1.14.5 scipy Cython seaborn pymc3
 
-RUN pip install --upgrade six numpy scipy pymc3
 RUN pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git
 
 # Set up .theanorc for CUDA
