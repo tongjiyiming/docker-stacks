@@ -3,11 +3,11 @@
 
 # Ubuntu 18.04 (bionic) from 2018-05-26
 # https://github.com/docker-library/official-images/commit/aac6a45b9eb2bffb8102353c350d341a410fb169
-FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:9.0-cudnn7-devel
 
 # FROM ubuntu:bionic-20180526@sha256:c8c275751219dadad8fa56b3ac41ca6cb22219ff117ca98fe82b42f24e1ba64e
 
-LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+LABEL maintainer="Liming <tongjiyiming@gmail.com>"
 
 USER root
 
@@ -26,8 +26,8 @@ RUN apt-get update && apt-get -yq dist-upgrade \
     sudo \
     locales \
     fonts-liberation \
-    liblapack-dev \
-    libopenblas-dev \
+#    liblapack-dev \
+#    libopenblas-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -108,9 +108,9 @@ RUN conda install --quiet --yes \
     'notebook=5.6.*' \
     'jupyterhub=0.9.*' \
     'jupyterlab=0.34.*' && \
-#    pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git && \
     conda clean -tipsy && \
-    jupyter labextension install @jupyterlab/hub-extension@^0.11.0 && \
+    jupyter labextension install @jupyterlab/hub-extension@^0.11.0 \
+    @jupyterlab/toc && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
@@ -118,10 +118,9 @@ RUN conda install --quiet --yes \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-USER root
 # Set up .theanorc for CUDA
 
-RUN echo "[global]\ndevice=cuda\nfloatX=float32\noptimizer_including=cudnn\n[lib]\ncnmem=0.1\n[nvcc]\nfastmath=True" > /root/.theanorc
+# RUN echo "[global]\ndevice=cuda\nfloatX=float32\noptimizer_including=cudnn\n[lib]\ncnmem=0.1\n[nvcc]\nfastmath=True" > /root/.theanorc
 
 USER root
 
