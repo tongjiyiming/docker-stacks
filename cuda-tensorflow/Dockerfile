@@ -3,11 +3,10 @@
 
 # Ubuntu 18.04 (bionic) from 2018-05-26
 # https://github.com/docker-library/official-images/commit/aac6a45b9eb2bffb8102353c350d341a410fb169
-FROM nvidia/cuda:9.0-cudnn7-runtime
-
 # FROM ubuntu:bionic-20180526@sha256:c8c275751219dadad8fa56b3ac41ca6cb22219ff117ca98fe82b42f24e1ba64e
+FROM nvidia/cuda:9.0-cudnn7-devel
 
-LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+LABEL maintainer="Liming Zhang, tongjiyiming@gmail.com"
 
 USER root
 
@@ -16,13 +15,9 @@ USER root
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -yq dist-upgrade \
  && apt-get install -yq --no-install-recommends \
-    build-essential \
-    nano \
-    apt-utils \
     wget \
+    git-core \
     bzip2 \
-    gfortran \
-    git \
     ca-certificates \
     sudo \
     locales \
@@ -56,9 +51,6 @@ RUN groupadd wheel -g 11 && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
-
-# Set CUDA_ROOT
-ENV CUDA_ROOT /usr/local/cuda/bin
 
 USER $NB_UID
 
@@ -97,13 +89,8 @@ RUN conda install --quiet --yes 'tini=0.18.0' && \
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
+    mkl=2017 \
     mkl-service \
-#    Cython \
-#    pygpu \
-#    six \
-#    pymc3 \
-#    matplotlib \
-#    seaborn \
     'notebook=5.6.*' \
     'jupyterhub=0.9.*' \
     'jupyterlab=0.34.*' && \
@@ -116,7 +103,7 @@ RUN conda install --quiet --yes \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-RUN pip install tensorflow-gpu==1.7.1 edward seaborn
+RUN pip install tensorflow==1.7.1 Cython edward seaborn
 
 USER root
 
