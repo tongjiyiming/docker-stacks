@@ -4,7 +4,22 @@
 # Ubuntu 18.04 (bionic) from 2018-05-26
 # https://github.com/docker-library/official-images/commit/aac6a45b9eb2bffb8102353c350d341a410fb169
 # FROM ubuntu:bionic-20180526@sha256:c8c275751219dadad8fa56b3ac41ca6cb22219ff117ca98fe82b42f24e1ba64e
-FROM nvidia/cuda:9.0-cudnn7-devel
+ARG repository=nvidia/cuda
+FROM ${repository}:9.0-devel-ubuntu16.04
+LABEL maintainer "NVIDIA CORPORATION <cudatools@nvidia.com>"
+
+ENV CUDNN_VERSION 7.0.5.15
+LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+            libcudnn7=$CUDNN_VERSION-1+cuda9.0 \
+            libcudnn7-dev=$CUDNN_VERSION-1+cuda9.0 && \
+    apt-mark hold libcudnn7 && \
+    rm -rf /var/lib/apt/lists/*
+
+# FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+# FROM nvidia/cuda:8.0-cudnn5-devel
+# FROM nvidia/cuda:9.1-cudnn7-devel-ubuntu16.04
 
 LABEL maintainer="Liming Zhang, tongjiyiming@gmail.com"
 
@@ -103,7 +118,7 @@ RUN conda install --quiet --yes \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-RUN pip install tensorflow==1.7.1 Cython edward seaborn
+RUN pip install tensorflow-gpu==1.7.1 edward Cython seaborn keras==2.1.6 scikit-learn
 
 USER root
 
