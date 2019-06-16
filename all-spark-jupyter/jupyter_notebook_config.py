@@ -8,23 +8,16 @@ import errno
 import stat
 from subprocess import call
 
-print("generate jupyter certificate")
-decrypted = call(["sudo", "openssl", "req", "-x509", 
-"-nodes", "-days", "365", "-subj", "/C=US/ST=VA", 
-"-newkey", "rsa:1024", 
-"-keyout", "/home/lem/.jupyter/mykey.key", 
-"-out", "/home/lem/.jupyter/mycert.pem"])
+decrypted = call(["openssl", "req", "-x509", "-nodes", "-days", "365", "-subj", "/C=US/ST=VA", "-newkey", "rsa:1024", "-keyout", "/home/lem/.jupyter/mykey.key", "-out", "/home/lem/.jupyter/mycert.pem"])
 print(decrypted)
 
-### test for pytorch running
-print("test pytorch")
-decrypted = call(["sudo", "python", "/home/lem/gpu_test_torch.py"])
-print(decrypted)
+### test for theano gpu running
+# decrypted = call(["python", "/home/lem/gpu_test.py"])
+# print(decrypted)
 ##################
 
-print("configure jupyter notebook sign in password")
 c = get_config()
-c.NotebookApp.ip = '*'
+c.NotebookApp.ip = '0.0.0.0'
 c.NotebookApp.port = 8888
 c.NotebookApp.open_browser = False
 c.NotebookApp.password='sha1:559f89535f2d:c320212e6708222a537f4f1d3efada91c1a8c5ca' \
@@ -47,7 +40,7 @@ if 'GEN_CERT' in os.environ:
         else:
             raise
     # Generate a certificate if one doesn't exist on disk
-    subprocess.check_call(['sudo', 'openssl', 'req', '-new',
+    subprocess.check_call(['openssl', 'req', '-new',
                            '-newkey', 'rsa:2048',
                            '-days', '365',
                            '-nodes', '-x509',

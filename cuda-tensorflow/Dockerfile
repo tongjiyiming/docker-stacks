@@ -37,7 +37,7 @@ RUN apt-get update && apt-get -yq dist-upgrade \
     sudo \
     locales \
     fonts-liberation \
- && apt-get clean \
+    && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -118,7 +118,15 @@ RUN conda install --quiet --yes \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
+RUN conda install tsnecuda -c cannylab && \
+    conda clean -tipsy
+
+RUN conda install -c conda-forge python-igraph && \
+    conda clean -tipsy
+
 RUN pip install tensorflow-gpu==1.7.1 edward Cython seaborn keras==2.1.6 scikit-learn
+
+RUN pip install powerlaw networkx numba
 
 USER root
 

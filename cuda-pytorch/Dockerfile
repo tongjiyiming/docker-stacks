@@ -28,7 +28,10 @@ USER root
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get -yq dist-upgrade \
+RUN apt-get update \
+ && apt-get install -y software-properties-common \
+ && add-apt-repository ppa:timsc/opencv-3.4 \
+ && apt-get update && apt-get -yq dist-upgrade \
  && apt-get install -yq --no-install-recommends \
     wget \
     git-core \
@@ -37,6 +40,7 @@ RUN apt-get update && apt-get -yq dist-upgrade \
     sudo \
     locales \
     fonts-liberation \
+    python3-opencv \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -119,9 +123,13 @@ RUN conda install --quiet --yes \
     fix-permissions /home/$NB_USER
 
 RUN pip install --no-cache-dir Cython seaborn scikit-learn
-RUN pip install --no-cache-dir numpy torchvision_nightly
-RUN pip install --no-cache-dir torch_nightly -f https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html
-RUN pip install --no-cache-dir git+https://github.com/uber/pyro.git#egg=project[extras] 
+#RUN pip install --no-cache-dir numpy torchvision_nightly
+#RUN pip install --no-cache-dir torch_nightly -f https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html
+#RUN pip install --no-cache-dir git+https://github.com/uber/pyro.git#egg=project[extras] 
+RUN pip install --no-cache-dir scikit-image
+RUN pip install --no-cache-dir opencv-contrib-python
+
+RUN pip install torch torchvision pyro-ppl
 
 USER root
 
